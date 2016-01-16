@@ -4,6 +4,15 @@ Solver::Solver(QString str, bool toMaximize)
 {
     isToMaximize = toMaximize;
     this->mainFunction = ReadFunction(str);
+    if(!isToMaximize) {
+        cout << "Bringing function to maximize by multiplying all factors with -1!";
+
+        QMapIterator<QString, double> it(mainFunction.variables);
+        while (it.hasNext()) {
+            it.next();
+            mainFunction.variables.insert(it.key(), -1 * it.value());
+        }
+    }
 
     cout << "Solver created!" << endl;
 }
@@ -126,23 +135,32 @@ QString Solver::GetConditionsAsString()
 {
     QString str;
     for(Equation eq: conditions) {
-        if(eq.isValid) {
-            QMapIterator<QString, double> it(eq.variables);
-            while (it.hasNext()) {
-                it.next();
-                str += QString::number(it.value()) + " * " + it.key();
+        str += GetEquationAsString(eq);
+    }
 
-                if(it.hasNext()) {
-                    str += " + ";
-                } else {
-                    str += SignToString(eq.sign) + QString::number(eq.value) + "\n";
-                }
+    return str;
+}
+
+QString Solver::GetEquationAsString(Solver::Equation eq)
+{
+    QString str;
+
+    if(eq.isValid) {
+        QMapIterator<QString, double> it(eq.variables);
+        while (it.hasNext()) {
+            it.next();
+            str += QString::number(it.value()) + " * " + it.key();
+
+            if(it.hasNext()) {
+                str += " + ";
+            } else {
+                str += SignToString(eq.sign) + QString::number(eq.value) + "\n";
             }
-
-
-        } else {
-            str.append("Equation not valid!");
         }
+
+
+    } else {
+        str.append("Equation not valid!");
     }
 
     return str;
@@ -160,6 +178,13 @@ void Solver::AddSlackVars()
         }
     }
 
+    QMapIterator<QString, double> itFunVars(mainFunction.variables);
+    while(itFunVars.hasNext()) {
+        itFunVars.next();
+        usedVars.insert(itFunVars.key());
+    }
+
+
     // set beginning index of slack variables
     QSetIterator<QString> itUsedVars(usedVars);
     while(itUsedVars.hasNext()) {
@@ -171,7 +196,10 @@ void Solver::AddSlackVars()
 
     QSetIterator<QString> it((QSet<QString>(usedVars)).subtract(nonNegativeVars));
     while(it.hasNext()) {
-        slackVars.insert(it.next(), GetNewSlackVariable());
+        const QString oldVar = it.next();
+        const QString newSlackVar = GetNewSlackVariable();
+        slackVars.insert(oldVar, newSlackVar);
+        mainFunction.variables.insert(newSlackVar, mainFunction.variables.value(oldVar) * -1);
     }
 
     QMapIterator<QString, QString> mapIt(slackVars);
@@ -201,8 +229,8 @@ mat Solver::Solve(mat M)
 
     // make all variables >= 0 and add vars
     AddSlackVars();
-
-    cout << GetConditionsAsString().toStdString() << endl;
+    cout << "Function:\n" << GetEquationAsString(mainFunction).toStdString() << endl;
+    cout << "Conditions:\n" << GetConditionsAsString().toStdString() << endl;
 
     /*cout << "Solve for M(Rows=" << M.n_rows << "; Cols=" << M.n_cols << "):" << endl;
     M.print("M:");

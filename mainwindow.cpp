@@ -21,7 +21,14 @@ void MainWindow::StartCalculation()
     if(solver != NULL) {
         delete solver;
     }
-    solver = new Solver(ui->functionEdit->text(), true);
+
+    int selectedIndex = ui->directionComboBox->currentIndex();
+    bool isFunctionMaximize = true;
+    if(selectedIndex == 1) {
+        isFunctionMaximize = false;
+    }
+
+    solver = new Solver(ui->functionEdit->text(), isFunctionMaximize);
 
     // add conditions
     QList<QObject*> conditionsWidgets = ui->conditionsGroup->children();

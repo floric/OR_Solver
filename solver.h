@@ -34,6 +34,7 @@ public:
     void AddNonNegativeVaribles(QVector<QString> variables);
 
     QString GetConditionsAsString();
+    QString GetEquationAsString(Equation eq);
 
     mat Solve(mat M);
 

@@ -30,7 +30,7 @@
       <item>
        <widget class="QLineEdit" name="functionEdit">
         <property name="text">
-         <string>5000*x1+2500*x2+x3</string>
+         <string>5000*x1+2500*x2</string>
         </property>
        </widget>
       </item>
@@ -59,7 +59,7 @@
        <item>
         <widget class="QLineEdit" name="lineEdit">
          <property name="text">
-          <string>x1+x3 &lt;= 50</string>
+          <string>x1 &lt;= 50</string>
          </property>
         </widget>
        </item>
