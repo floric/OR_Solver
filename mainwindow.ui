@@ -30,7 +30,7 @@
       <item>
        <widget class="QLineEdit" name="functionEdit">
         <property name="text">
-         <string>5000*x1+2500*x2</string>
+         <string>5000*x1+2500*x2+x3</string>
         </property>
        </widget>
       </item>
@@ -66,7 +66,7 @@
        <item>
         <widget class="QLineEdit" name="lineEdit_2">
          <property name="text">
-          <string>x4+x2 &lt;= 60</string>
+          <string>x2 &lt;= 60</string>
          </property>
         </widget>
        </item>
@@ -93,6 +93,34 @@
        </item>
       </layout>
      </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <item>
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Variables:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="varsLineEdit">
+        <property name="text">
+         <string>x1,x2</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>&gt;= 0</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
     <item>
      <widget class="QPushButton" name="calculateButton">

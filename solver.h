@@ -8,6 +8,7 @@
 #include <QObject>
 #include <QMap>
 #include <QVector>
+#include <QSet>
 
 using namespace arma;
 
@@ -30,17 +31,23 @@ public:
 
     Equation ReadFunction(QString str);
     bool AddCondition(QString str);
+    void AddNonNegativeVaribles(QVector<QString> variables);
 
     QString GetConditionsAsString();
 
     mat Solve(mat M);
 
     void ParseTerm(QString str, Equation *eq);
+
+    void AddSlackVars();
 private:
     Equation mainFunction;
     bool isToMaximize = true;
 
     QVector<Equation> conditions;
+    QSet<QString> nonNegativeVars;
+    QSet<QString> usedVars;
+    QMap<QString, QString> slackVars;
 
     int FindPivotColumn(const mat& M);
     int FindPivotRow(const mat& M, int l);
@@ -48,6 +55,10 @@ private:
 
     bool IsOptimalSolution(const mat& M);
     QString SignToString(FunctionSign sign);
+
+    QString GetNewSlackVariable();
+
+    int slackIndex = 0;
 };
 
 #endif // SOLVER_H

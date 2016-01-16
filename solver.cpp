@@ -108,9 +108,18 @@ bool Solver::AddCondition(QString str)
 {
     Equation eq = ReadFunction(str);
 
-    conditions.append(eq);
+    if(eq.isValid) {
+        conditions.append(eq);
+    }
 
     return true;
+}
+
+void Solver::AddNonNegativeVaribles(QVector<QString> variables)
+{
+    for(QString varName : variables) {
+        nonNegativeVars.insert(varName);
+    }
 }
 
 QString Solver::GetConditionsAsString()
@@ -139,11 +148,66 @@ QString Solver::GetConditionsAsString()
     return str;
 }
 
+void Solver::AddSlackVars()
+{
+
+    // add slack vars for every non negative variable
+    for(Equation eq : conditions) {
+        QMapIterator<QString, double> it(eq.variables);
+        while(it.hasNext()) {
+            it.next();
+            usedVars.insert(it.key());
+        }
+    }
+
+    // set beginning index of slack variables
+    QSetIterator<QString> itUsedVars(usedVars);
+    while(itUsedVars.hasNext()) {
+        int varIndex = itUsedVars.next().at(1).unicode() - 48;
+        if(varIndex > slackIndex) {
+            slackIndex = varIndex + 1;
+        }
+    }
+
+    QSetIterator<QString> it((QSet<QString>(usedVars)).subtract(nonNegativeVars));
+    while(it.hasNext()) {
+        slackVars.insert(it.next(), GetNewSlackVariable());
+    }
+
+    QMapIterator<QString, QString> mapIt(slackVars);
+    while(mapIt.hasNext()) {
+        mapIt.next();
+        cout << "New slack variable: " << mapIt.key().toStdString() << " gets " << mapIt.value().toStdString() << endl;
+    }
+
+    // add slack vars for every inequation
+    for(int i = 0; i < conditions.size(); ++i) {
+        Equation eq = conditions.at(i);
+        if(eq.sign == Solver::FunctionSign::LtE) {
+            eq.variables.insert(GetNewSlackVariable(), 1);
+            eq.sign = Solver::FunctionSign::E;
+        }
+
+        conditions[i] = eq;
+    }
+}
+
 mat Solver::Solve(mat M)
 {
-    cout << "Solve for M(Rows=" << M.n_rows << "; Cols=" << M.n_cols << "):" << endl;
+
+
+    // bring function normal form
+
+
+    // make all variables >= 0 and add vars
+    AddSlackVars();
+
+    cout << GetConditionsAsString().toStdString() << endl;
+
+    /*cout << "Solve for M(Rows=" << M.n_rows << "; Cols=" << M.n_cols << "):" << endl;
     M.print("M:");
 
+    // Apply simplex algorithm
     int iterations = 0;
 
     while(iterations < 10) {
@@ -172,7 +236,7 @@ mat Solver::Solve(mat M)
         M.at(0, l) = temp;
 
         M.print("After iteration:");
-    }
+    }*/
 
     return M;
 }
@@ -290,5 +354,10 @@ QString Solver::SignToString(Solver::FunctionSign sign)
         default:
             return "?";
     }
+}
+
+QString Solver::GetNewSlackVariable()
+{
+    return ("x" + QString::number(slackIndex++));
 }
 

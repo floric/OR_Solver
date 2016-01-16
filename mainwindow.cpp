@@ -33,7 +33,11 @@ void MainWindow::StartCalculation()
         }
     }
 
-    cout << solver->GetConditionsAsString().toStdString() << endl;
+    // add non negative variables
+    QString varStr = ui->varsLineEdit->text().simplified();
+    varStr.replace(" ", "");
+    QStringList variables = varStr.split(",");
+    solver->AddNonNegativeVaribles(variables.toVector());
 
     mat T(1,1);
 
@@ -44,5 +48,5 @@ void MainWindow::StartCalculation()
       << 6 << 30 << 5 << 1600 << endr
       << 0 << -5000 << -2500 << 0 << endr;
 
-    //solver->Solve(T);
+    solver->Solve(T);
 }
